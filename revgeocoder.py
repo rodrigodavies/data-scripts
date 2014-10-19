@@ -36,14 +36,17 @@ def revGeo(sourceFile):
 			ks_id = cleanid(cols[0])
 			lat = cleanGeo(cols[1])
 			lon = cleanGeo(cols[2])
-			result = myGeo.reverse_geocode(float(lat),float(lon))
-			latlon = str(lat) + "," + str(lon)
-			zipcode = checkNone(result[0].postal_code)
-			if len(str(zipcode)) == 4:
-				zipcode = '0' + zipcode #correcting for five digit zips
-			country = checkNone(result[0].country)
-			state = checkNone(result[0].state)
-			city = checkNone(result[0].city)
+			try:
+				result = myGeo.reverse_geocode(float(lat),float(lon))
+				latlon = str(lat) + "," + str(lon)
+				zipcode = checkNone(result[0].postal_code)
+				if len(str(zipcode)) == 4:
+					zipcode = '0' + zipcode #correcting for five digit zips
+				country = checkNone(result[0].country)
+				state = checkNone(result[0].state)
+				city = checkNone(result[0].city)
+			except GeocoderError:
+				(zipcode, country, state, city) = (".", ".", ".", ".")
 			resultString = "%s\t%s\t%s\t%s\t%s\t%s\n"%(ks_id,latlon,zipcode,country,state,city)
 			dataString = "%s%s"%(dataString, resultString)
 			print "Done: (" + row_num +") " + zipcode + " " + country + " " + state + " " + city
