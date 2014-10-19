@@ -7,10 +7,18 @@ from pygeocoder import Geocoder
 import csv
 import sys
 from time import sleep
+import ConfigParser
 
 # initialize and set proxy
 myGeo = Geocoder()
-myGeo.set_proxy('') # fill in if you're using one
+config = ConfigParser.ConfigParser()
+config.read('revgeocoder-settings.ini')
+proxy = config.get('default', 'proxy')
+myGeo.set_proxy(proxy) # read from config file
+
+def createCols(row):
+	cols = str(row)
+	return cols.split(',')
 
 def cleanid(col):
 	clean_string = str(col).split("'")
@@ -36,11 +44,9 @@ def revGeo(sourceFile):
 		soup = csv.reader(csvfile, delimiter=',')
 		row_num = 1
 		for row in soup:
-			cols = str(row)
-			cols = cols.split(',')
+			cols = createCols(row)
 			ks_id = cleanid(cols[0])
-			lat = cleanGeo(cols[1])
-			lon = cleanGeo(cols[2])
+			(lat, lon) = (cleanGeo(cols[1]), cleanGeo(cols[2]))
 			try:
 				result = myGeo.reverse_geocode(float(lat),float(lon))
 				latlon = str(lat) + "," + str(lon)
@@ -50,7 +56,7 @@ def revGeo(sourceFile):
 				country = cleanString(result[0].country)
 				state = cleanString(result[0].state)
 				city = cleanString(result[0].city)
-			except GeocoderError:
+			except Exception: # Having some trouble with GeoCoder exception, this is a catch-all 
 				(zipcode, country, state, city) = (".", ".", ".", ".")
 			resultString = "%s\t%s\t%s\t%s\t%s\t%s\n"%(ks_id,latlon,zipcode,country,state,city)
 			dataString = "%s%s"%(dataString, resultString)
@@ -69,6 +75,6 @@ def writeData(dataString, file):
 
 if __name__ == "__main__":
     # source = sys.argv[1]
-    sources = ['revgeo-1.csv', 'revgeo-2.csv', 'revgeo-3.csv']
+    sources = ['revgeo-3.csv', 'revgeo-1.csv']
     for i in sources:
     	revGeo(i)
