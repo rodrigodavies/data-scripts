@@ -10,7 +10,7 @@ from time import sleep
 
 # initialize and set proxy
 myGeo = Geocoder()
-myGeo.set_proxy('') # fill in if you're using one
+myGeo.set_proxy('us.proxymesh.com:31280') # fill in if you're using one
 
 def cleanid(col):
 	clean_string = str(col).split("'")
@@ -24,6 +24,11 @@ def checkNone(result):
 	if result == None:
 		result = ''
 	return result
+
+def cleanString(result):
+    if result == None:
+		result = ''
+    return str(result.encode('ascii','ignore'))
 
 def revGeo(sourceFile):
 	with open(sourceFile, 'rU') as csvfile:
@@ -42,14 +47,14 @@ def revGeo(sourceFile):
 				zipcode = checkNone(result[0].postal_code)
 				if len(str(zipcode)) == 4:
 					zipcode = '0' + zipcode #correcting for five digit zips
-				country = checkNone(result[0].country)
-				state = checkNone(result[0].state)
-				city = checkNone(result[0].city)
+				country = cleanString(result[0].country)
+				state = cleanString(result[0].state)
+				city = cleanString(result[0].city)
 			except GeocoderError:
 				(zipcode, country, state, city) = (".", ".", ".", ".")
 			resultString = "%s\t%s\t%s\t%s\t%s\t%s\n"%(ks_id,latlon,zipcode,country,state,city)
 			dataString = "%s%s"%(dataString, resultString)
-			print "Done: (" + row_num +") " + zipcode + " " + country + " " + state + " " + city
+			print "Done: (" + str(row_num) +") " + str(zipcode) + " " + str(country) + " " + str(state) + " " + str(city)
 			row_num += 1
 			sleep(0.4)
 	filename = "revgeocoded-%s.tsv"%(sourceFile) #add tag to filename
@@ -63,5 +68,10 @@ def writeData(dataString, file):
 	f.close()
 
 if __name__ == "__main__":
-    source = sys.argv[1]
-    revGeo(source)
+    # source = sys.argv[1]
+    source1 = 'revgeo-1.csv'
+    source2 = 'revgeo-1.csv'
+    source3 = 'revgeo-1.csv'
+    revGeo(source1)
+    revGeo(source2)
+    revGeo(source3)
