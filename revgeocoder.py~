@@ -10,7 +10,7 @@ from time import sleep
 
 # initialize and set proxy
 myGeo = Geocoder()
-myGeo.set_proxy('') # fill in if you're using one
+myGeo.set_proxy('us.proxymesh.com:31280') # fill in if you're using one
 
 def cleanid(col):
 	clean_string = str(col).split("'")
