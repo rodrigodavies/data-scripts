@@ -16,10 +16,6 @@ config.read('revgeocoder-settings.ini')
 proxy = config.get('default', 'proxy')
 myGeo.set_proxy(proxy) # read from config file
 
-def createCols(row):
-	cols = str(row)
-	return cols.split(',')
-
 def cleanid(col):
 	clean_string = str(col).split("'")
 	return int(clean_string[1])
@@ -43,8 +39,10 @@ def revGeo(sourceFile):
 		dataString = ""
 		soup = csv.reader(csvfile, delimiter=',')
 		row_num = 1
+		# row_count = sum(1 for row in soup)
 		for row in soup:
-			cols = createCols(row)
+			cols = str(row)
+			cols = cols.split(',')
 			ks_id = cleanid(cols[0])
 			(lat, lon) = (cleanGeo(cols[1]), cleanGeo(cols[2]))
 			try:
@@ -58,9 +56,13 @@ def revGeo(sourceFile):
 				city = cleanString(result[0].city)
 			except Exception: # Having some trouble with GeoCoder exception, this is a catch-all 
 				(zipcode, country, state, city) = (".", ".", ".", ".")
+				print "Exception at: " + row_num + " - coords: " + latlon
 			resultString = "%s\t%s\t%s\t%s\t%s\t%s\n"%(ks_id,latlon,zipcode,country,state,city)
 			dataString = "%s%s"%(dataString, resultString)
-			print "Done: (" + str(row_num) +") " + str(zipcode) + " " + str(country) + " " + str(state) + " " + str(city)
+			perc = (float(row_num) / float(20000) * 100)
+			donestring = '\r %s Done: (%s) %s %s %s %s'%(perc,row_num,zipcode,country,state,city)
+			print donestring, # comma to avoid newline
+			sys.stdout.flush()
 			row_num += 1
 			sleep(0.4)
 	filename = "revgeocoded-%s.tsv"%(sourceFile) #add tag to filename
@@ -75,6 +77,5 @@ def writeData(dataString, file):
 
 if __name__ == "__main__":
     # source = sys.argv[1]
-    sources = ['revgeo-3.csv', 'revgeo-1.csv']
-    for i in sources:
-    	revGeo(i)
+    source = 'revgeo-1.csv'
+    revGeo(source)
