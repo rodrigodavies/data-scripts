@@ -56,7 +56,7 @@ def revGeo(sourceFile):
 				city = cleanString(result[0].city)
 			except Exception: # Having some trouble with GeoCoder exception, this is a catch-all 
 				(zipcode, country, state, city) = (".", ".", ".", ".")
-				print "Exception at: " + row_num + " - coords: " + latlon
+				print "Exception at: %s - coords: %s"%(row_num,latlon)
 			resultString = "%s\t%s\t%s\t%s\t%s\t%s\n"%(ks_id,latlon,zipcode,country,state,city)
 			dataString = "%s%s"%(dataString, resultString)
 			perc = (float(row_num) / float(20000) * 100)
